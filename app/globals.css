@@ -26,28 +26,6 @@
     --radius: 0.5rem;
   }
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-  }
-
   * {
     @apply border-border;
     transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
@@ -94,47 +72,170 @@
     color: white;
   }
 
-  /* Theme-aware text colors */
-  .theme-text-primary {
-    @apply text-gray-900 dark:text-white;
+  /* 国旗显示优化 - 修正版本 */
+  .country-flag {
+    position: relative;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
   }
 
-  .theme-text-secondary {
-    @apply text-gray-700 dark:text-gray-300;
+  .country-flag .country-code-fallback {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 10px;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
   }
 
-  .theme-text-muted {
-    @apply text-gray-600 dark:text-gray-400;
+  /* 只有在没有背景图片或背景图片加载失败时才显示文字 */
+  .country-flag:not([style*="background-image"]) .country-code-fallback {
+    opacity: 1;
   }
 
-  .theme-text-placeholder {
-    @apply text-gray-500 dark:text-gray-500;
+  /* 当背景图片存在且不为空时，隐藏文字 */
+  .country-flag[style*="background-image: url(https://flagcdn.com)"] .country-code-fallback {
+    opacity: 0 !important;
   }
 
-  /* Theme-aware backgrounds */
-  .theme-bg-card {
-    @apply bg-white/90 border-gray-200/50 dark:bg-white/5 dark:border-white/10;
+  /* 紧凑表格布局 */
+  .cards-table {
+    font-size: 0.875rem;
+    min-width: 100%;
   }
 
-  .theme-bg-input {
-    @apply bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 dark:bg-white/5 dark:border-white/20 dark:text-white dark:placeholder:text-gray-500;
+  .cards-table th,
+  .cards-table td {
+    padding: 8px 6px;
   }
 
-  .theme-bg-header {
-    @apply bg-white/90 border-gray-200/50 dark:bg-black/20 dark:border-white/10;
+  .cards-table th:first-child,
+  .cards-table td:first-child {
+    width: 40px;
+    padding: 8px 4px;
   }
 
-  /* Theme-aware table styles */
-  .theme-table-border {
-    @apply border-gray-200 dark:border-white/10;
+  .cards-table th:nth-child(2),
+  .cards-table td:nth-child(2) {
+    width: 15%;
   }
 
-  .theme-table-hover {
-    @apply hover:bg-gray-50 dark:hover:bg-white/5;
+  .cards-table th:nth-child(3),
+  .cards-table td:nth-child(3) {
+    width: 12%;
+  }
+
+  .cards-table th:nth-child(4),
+  .cards-table td:nth-child(4) {
+    width: 10%;
+    white-space: nowrap;
+  }
+
+  .cards-table th:nth-child(5),
+  .cards-table td:nth-child(5) {
+    width: 7%;
+  }
+
+  .cards-table th:nth-child(6),
+  .cards-table td:nth-child(6) {
+    width: 12%;
+  }
+
+  .cards-table th:nth-child(7),
+  .cards-table td:nth-child(7) {
+    width: auto;
+    min-width: 160px;
+  }
+
+  .issuer-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-height: 36px;
+    justify-content: center;
+  }
+
+  .issuer-name {
+    font-weight: 500;
+    font-size: 0.8rem;
+    line-height: 1.1;
+    color: inherit;
+  }
+
+  .card-details {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    opacity: 0.8;
+  }
+
+  .card-details span {
+    white-space: nowrap;
+  }
+
+  .country-compact {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .country-compact .country-flag {
+    width: 16px;
+    height: 12px;
+  }
+
+  .country-compact span {
+    font-size: 0.8rem;
+  }
+
+  .bin-country-display {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* BIN国家显示的国旗 */
+  .bin-country-flag {
+    width: 20px;
+    height: 15px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .bin-country-flag .country-code-fallback {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 8px;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+  }
+
+  /* 只有在背景图片加载失败时才显示文字 */
+  .bin-country-flag:not([style*="background-image"]) .country-code-fallback {
+    opacity: 1;
+  }
+
+  .bin-country-flag[style*="background-image: url(https://flagcdn.com)"] .country-code-fallback {
+    opacity: 0 !important;
   }
 }
 
-/* Custom scrollbar */
+/* 简化滚动条样式 */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -151,18 +252,6 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.3);
-}
-
-.dark ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
 }
 
 /* Glow effects */
@@ -282,4 +371,71 @@ body.menu-open {
 .backdrop-blur-xl {
   position: relative;
   z-index: 1;
+}
+
+/* ===== 交互式背景动画 ===== */
+
+/* 网格移动动画 */
+@keyframes gridMove {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(80px, 80px);
+  }
+}
+
+/* 浮动元素动画 */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px) scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateY(-20px) scale(1.1);
+    opacity: 1;
+  }
+}
+
+/* 网格图案类 */
+.grid-pattern {
+  animation: gridMove 20s linear infinite;
+}
+
+/* 浮动元素类 */
+.floating-elements {
+  animation: float 8s ease-in-out infinite;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  /* 在移动设备上减少浮动元素的大小 */
+  .floating-elements > div {
+    transform: scale(0.7);
+  }
+
+  /* 减慢动画速度以节省电池 */
+  .grid-pattern {
+    animation-duration: 30s;
+  }
+
+  .floating-elements > div {
+    animation-duration: 12s;
+  }
+}
+
+/* 减少动画偏好的用户 */
+@media (prefers-reduced-motion: reduce) {
+  .grid-pattern,
+  .floating-elements > div {
+    animation: none;
+  }
+}
+
+/* 高对比度模式支持 */
+@media (prefers-contrast: high) {
+  .floating-elements > div {
+    opacity: 0.3;
+  }
 }

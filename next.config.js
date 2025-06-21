@@ -4,13 +4,13 @@ const nextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: "http://93.127.139.192:10234/api/:path*", // 你的 Flask 后端地址
+        destination: "http://localgost:10234/api/:path*", // 你的 Flask 后端地址
       },
     ]
   },
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || "http://93.127.139.192:10234/api/api",
-  },
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || "http://locahost:10234/api",
+},
   eslint: {
     ignoreDuringBuilds: true,
   },
