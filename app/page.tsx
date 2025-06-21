@@ -176,21 +176,20 @@ export default function CardzManagement() {
   const { data, loading, error, refetch } = useApiData(searchQuery)
   const { mutate, loading: mutating } = useApiMutation()
 
-  // 获取所有BIN的国家信息 - 修正版本
+  // 获取所有BIN的国家信息 - 静默版本（不显示调试信息）
   const allBins = data?.feed_bins.map((bin) => bin.bin) || []
-  console.log(`🔍 [MAIN] 所有BIN列表:`, allBins)
-  console.log(`🔍 [MAIN] feed_bins数据:`, data?.feed_bins)
-
-  const { binInfoMap, loading: binLoading, error: binError } = useBinInfoBatch(allBins)
-
-  console.log(`🔍 [MAIN] BIN信息加载状态:`, { binLoading, binError })
-  console.log(`🔍 [MAIN] BIN信息映射大小:`, binInfoMap.size)
+  const { binInfoMap } = useBinInfoBatch(allBins)
 
   // 测试后端连接
   useEffect(() => {
     const testConnection = async () => {
+      // 给一点时间让组件初始化
+      await new Promise((resolve) => setTimeout(resolve, 500))
+
       const isConnected = await apiClient.testConnection()
       setConnectionStatus(isConnected ? "connected" : "disconnected")
+
+      const apiInfo = apiClient.getApiInfo()
 
       if (isConnected) {
         toast({
@@ -198,11 +197,9 @@ export default function CardzManagement() {
           description: "已成功连接到后端服务器",
         })
       } else {
-        const apiInfo = apiClient.getApiInfo()
         toast({
-          title: "❌ 后端连接失败",
-          description: `无法连接到: ${apiInfo.baseUrl}`,
-          variant: "destructive",
+          title: "⚠️ 使用演示模式",
+          description: `无法连接到后端服务器，当前使用模拟数据进行演示`,
         })
       }
     }
@@ -475,9 +472,8 @@ export default function CardzManagement() {
       refetch() // 重新获取数据
     } else {
       toast({
-        title: "❌ 连接失败",
-        description: "仍无法连接到后端服务器",
-        variant: "destructive",
+        title: "⚠️ 仍在演示模式",
+        description: "无法连接到后端服务器，继续使用模拟数据",
       })
     }
   }
@@ -496,7 +492,7 @@ export default function CardzManagement() {
     )
   }
 
-  if (error) {
+  if (error && !data) {
     return (
       <>
         <InteractiveBackground />
@@ -511,6 +507,8 @@ export default function CardzManagement() {
       </>
     )
   }
+
+  const apiInfo = apiClient.getApiInfo()
 
   return (
     <>
@@ -536,15 +534,15 @@ export default function CardzManagement() {
                     </div>
                   )}
                   {connectionStatus === "disconnected" && (
-                    <div className="flex items-center gap-1 px-2 py-1 bg-red-500/20 rounded-full border border-red-400/30">
-                      <WifiOff className="w-4 h-4 text-red-300" />
-                      <span className="text-xs text-red-200">未连接</span>
+                    <div className="flex items-center gap-1 px-2 py-1 bg-yellow-500/20 rounded-full border border-yellow-400/30">
+                      <WifiOff className="w-4 h-4 text-yellow-300" />
+                      <span className="text-xs text-yellow-200">演示模式</span>
                     </div>
                   )}
                   {connectionStatus === "testing" && (
-                    <div className="flex items-center gap-1 px-2 py-1 bg-yellow-500/20 rounded-full border border-yellow-400/30">
-                      <div className="w-4 h-4 border-2 border-yellow-300 border-t-transparent rounded-full animate-spin"></div>
-                      <span className="text-xs text-yellow-200">测试中</span>
+                    <div className="flex items-center gap-1 px-2 py-1 bg-blue-500/20 rounded-full border border-blue-400/30">
+                      <div className="w-4 h-4 border-2 border-blue-300 border-t-transparent rounded-full animate-spin"></div>
+                      <span className="text-xs text-blue-200">测试中</span>
                     </div>
                   )}
                 </div>
@@ -555,43 +553,23 @@ export default function CardzManagement() {
         </header>
 
         <main className="relative z-10 container mx-auto px-6 py-8 space-y-8">
-          {/* 连接状态警告 - 只在未连接时显示 */}
-          {connectionStatus === "disconnected" && (
-            <Alert className="border-red-400/30 bg-red-500/10 backdrop-blur-xl">
-              <AlertCircle className="h-4 w-4 text-red-300" />
-              <AlertDescription className="text-red-200 flex items-center justify-between">
+          {/* 连接状态警告 - 只在演示模式时显示 */}
+          {apiInfo.usingMockData && (
+            <Alert className="border-yellow-400/30 bg-yellow-500/10 backdrop-blur-xl">
+              <AlertCircle className="h-4 w-4 text-yellow-300" />
+              <AlertDescription className="text-yellow-200 flex items-center justify-between">
                 <div>
-                  <strong>后端连接失败:</strong> 无法连接到后端服务器 ({apiClient.getApiInfo().baseUrl}
-                  )，当前使用模拟数据进行演示。
+                  <strong>演示模式:</strong>{" "}
+                  无法连接到后端服务器，当前使用模拟数据进行演示。所有操作都是模拟的，不会保存到真实数据库。
                 </div>
                 <Button
                   size="sm"
                   variant="outline"
                   onClick={handleRetryConnection}
-                  className="ml-4 border-red-400/30 text-red-200 hover:bg-red-500/20 bg-transparent"
+                  className="ml-4 border-yellow-400/30 text-yellow-200 hover:bg-yellow-500/20 bg-transparent"
                 >
                   重试连接
                 </Button>
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {/* BIN调试信息 */}
-          {allBins.length > 0 && (
-            <Alert className="border-blue-400/30 bg-blue-500/10 backdrop-blur-xl">
-              <AlertCircle className="h-4 w-4 text-blue-300" />
-              <AlertDescription className="text-blue-200">
-                <div>
-                  <strong>BIN调试信息:</strong>
-                  <br />• 发现 {allBins.length} 个BIN: {allBins.join(", ")}
-                  <br />• BIN信息加载状态: {binLoading ? "加载中..." : "完成"}
-                  <br />• 已获取 {binInfoMap.size} 个BIN的国家信息
-                  {binError && (
-                    <>
-                      <br />• 错误: {binError}
-                    </>
-                  )}
-                </div>
               </AlertDescription>
             </Alert>
           )}
@@ -611,7 +589,7 @@ export default function CardzManagement() {
                   <SelectTrigger className="bg-white/10 border-white/20 text-white">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-gray-900/95 border-white/20 backdrop-blur-xl">
+                  <SelectContent className="bg-gray-900/95 border-white/20 backdrop-blur-xl z-[9999]">
                     <SelectItem value="library">卡库 (未使用)</SelectItem>
                     <SelectItem value="pool">卡池 (已使用)</SelectItem>
                   </SelectContent>

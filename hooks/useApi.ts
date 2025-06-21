@@ -12,10 +12,30 @@ export function useApiData(searchQuery?: string) {
     try {
       setLoading(true)
       setError(null)
+
+      // 等待一小段时间，让连接测试有机会完成
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
       const result = await apiClient.getAllData(searchQuery)
       setData(result)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "获取数据失败")
+      const errorMessage = err instanceof Error ? err.message : "获取数据失败"
+      console.error("useApiData error:", errorMessage)
+      setError(errorMessage)
+
+      // 如果是连接错误，强制使用mock模式并重试
+      if (errorMessage.includes("HTML instead of JSON") || errorMessage.includes("Expected JSON response")) {
+        console.log("🔄 Forcing mock mode and retrying...")
+        apiClient.forceMockMode()
+        try {
+          const result = await apiClient.getAllData(searchQuery)
+          setData(result)
+          setError(null)
+        } catch (retryErr) {
+          console.error("Retry failed:", retryErr)
+          setError("无法获取数据，请检查网络连接")
+        }
+      }
     } finally {
       setLoading(false)
     }
